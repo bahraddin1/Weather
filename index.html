@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<style type="text/css">
+*{
+padding:0;
+margin:0;
+}
+.container{
+display:flex;
+flex-direction:column;
+height:100vh;
+background:green;
+justify-content:center;
+align-items:center;
+width:100%;
+}
+input, button {
+padding:10px;
+border:none;
+background:white;
+border-radius:5px;
+outline: none;
+}
+.card {
+margin:0 auto;
+background:linear-gradient(0deg, yellow, blue);
+padding:25px 40px;
+margin:10px;
+border-radius:5px;
+text-align:center;
+min-width:180px;
+box-shadow:0 0 4px gray;
+display:none;
+}
+.tempDisplay ,.humidityDisplay , .descDisplay , .weatherEmoji {
+
+margin-bottom:15px;
+}
+.tempDisplay {
+font-size:2rem;
+font-weight:600;
+margin-top:10px;
+}
+.humidityDisplay {
+font-weight:600;
+}
+.descDisplay {
+
+font-weight:600;
+font-size:1.5rem;
+}
+
+.weatherEmoji {
+font-size:3rem;
+
+}
+.errorDisplay {
+font-weight:600;
+font-size:1rem;
+}
+</style>
+</head>
+<body>
+	<div class="container" >
+		<form class="weather-form" >
+			<input type="text" class="city-input" placeholder="Enter City"  >
+			<button type="submit"  >Get Weather</button>
+		</form>
+		<div class="card"  >
+		<!--	<h1 class="city-display" >Asasa</h1>
+			<p class="tempDisplay" >25°</p>
+			<p class="humidityDisplay" >Humidity: 75%</p>
+			<p class="descDisplay" >Clear Sky</p>
+			<p class="weatherEmoji" >🌕</p>
+			<p class="errorDisplay" >Please Enter a City</p>
+			
+			-->
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		const weatherForm = document.querySelector(".weather-form")
+		const inputCity = document.querySelector(".city-input")
+		const card = document.querySelector(".card")
+		const apiKey= "093dd58278c8347fef000c47eb7c2118"
+		
+		weatherForm.addEventListener("submit", async event =>{
+			event.preventDefault()
+			
+			const city = inputCity.value;
+			
+			if(city){
+				try{
+					const weatherData = await getWeatherData(city);
+						displayWeatherInfo(weatherData)
+				}
+				catch(error){
+				  displayError(error)
+				}
+				
+			}else{
+				displayError("Please enter a city")	
+			}
+		});
+		
+		
+		async function getWeatherData(city){
+		 const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
+		 
+		 const response = await fetch(apiUrl)
+		 
+		 if(!response.ok){
+		 throw new Error()
+		 }
+		 
+		 return response.json();
+		}
+			
+		function displayWeatherInfo(data){
+			const {name: city, main : {temp, humidity}, weather:[{description, id}]} = data;
+			
+			card.textContent = ""
+			card.style.display = "block"
+			
+			const cityDisplay = document.createElement("h1");
+			cityDisplay.textContent = city;
+			cityDisplay.classList.add("city-display");
+			card.append(cityDisplay)
+			
+			const tempDisplay = document.createElement("p")
+				tempDisplay.textContent = `${(temp - 273.15).toFixed(1) }°C`
+				tempDisplay.classList.add("tempDisplay")
+				card.append(tempDisplay)
+				
+				
+			const humidityDisplay = document.createElement("p")
+			humidityDisplay.textContent = `Humidity: ${humidity}`
+			humidityDisplay.classList.add("humidityDisplay")
+			card.append(humidityDisplay)
+			
+			const descDisplay = document.createElement("p")
+			descDisplay.textContent = description
+			descDisplay.classList.add("descDisplay")
+			card.append(descDisplay)
+			
+			const weatherEmoji = document.createElement("p")
+			weatherEmoji.textContent = getWeatherEmoji(id)
+			weatherEmoji.classList.add("weatherEmoji")
+			card.append(weatherEmoji)
+		}
+		
+		
+		function getWeatherEmoji(id){
+		
+		switch(true){
+			 case (id >= 200 && id <= 300):
+			  return "🌩";
+			  break;
+			  
+			  case (id >= 300 && id <= 400):
+			  return "🌧️";
+			  break;
+			  
+			  case (id >= 500 && id <= 600):
+			  return "🌧";
+			  break;
+			  
+			  case (id >= 600 && id <= 700):
+			  return "❄";
+			  break;
+			  
+			  case (id >= 700 && id <= 800):
+			  return "☀️";
+			  break;
+			  
+			  case (id === 800):
+			  return "☀️️";
+			  break;
+			  
+			  case (id >= 801 && id <= 810):
+			  return "☁️";
+		      break;
+		      
+		      default :
+		       return "?";
+		}
+		}
+		
+	function displayError(message){
+	  	const errorDisplay = document.createElement("p");
+	  	errorDisplay.textContent = message;
+	  	errorDisplay.classList.add( "errorDisplay");
+	  	
+	  	card.textContent = ""
+	  	card.append(errorDisplay)
+	  	card.style.display = "block"
+	}	
+	
+	</script>
+</body>
+</html>
